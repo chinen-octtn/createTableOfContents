@@ -1,3 +1,3 @@
-import {hello} from './_module/sub.js';
+import {tableOfContents} from './_module/tableOfContents.js';
 
-hello();
+tableOfContents();
