@@ -57,10 +57,10 @@ const src = {
  * 公開用ディレクトリ
  */
 const dest = {
-  root: 'dist/',
-  image: 'dist/assets/img/',
-  css: 'dist/assets/css/',
-  js: 'dist/assets/js/',
+  root: 'docs/',
+  image: 'docs/assets/img/',
+  css: 'docs/assets/css/',
+  js: 'docs/assets/js/',
 };
 
 
