@@ -1,8 +1,8 @@
 {
-  "url": "https://example.com",
-  "name": "サイト名",
+  "url": "https://chinen-octtn.github.io/createTableOfContents/",
+  "name": "まぁしGitHub",
   "viewport": "width=device-width",
-  "description": "サイトの概要",
+  "description": "CMSの本文から目次を自動生成するJS",
   "keywords": "",
   "lang": "ja",
   "locale": "ja_JP",
@@ -11,12 +11,13 @@
   "fbAdmins": "",
   "twitterCard": "summary_large_image",
   "twitterSite": "",
-  "/": {
-    "name": "トップページ",
-    "description": "トップページの概要",
+  "/createTableOfContents/": {
+    "name": "目次生成JS",
+    "description": "CMSの本文から目次を自動生成するJSサンプルです。",
     "keywords": "",
-    "ogp": "",
+    "ogp": "https://avatars.githubusercontent.com/u/32406502?s=460&u=c95783bbb59dceff3dbdca430e02632c421b18f5&v=4",
     "canonical": "",
-    "alternate": ""
+    "alternate": "",
+    "url": "https://chinen-octtn.github.io/createTableOfContents/"
   }
 }
