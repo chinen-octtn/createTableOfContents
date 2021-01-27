@@ -3,3 +3,16 @@
 h1 {
   color: $color-main;
 }
+
+header,
+footer {
+  display: none;
+}
+
+main {
+  height: 3000px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
