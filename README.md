@@ -1,6 +1,6 @@
 # CMSの本文から目次を自動生成するJS
 
-`/assets/js/script.js`
+[`src/js/_module/tableOfContents.js`](https://github.com/chinen-octtn/createTableOfContents/blob/master/src/js/_module/tableOfContents.js)
 
 h2とh3を取得してリストを生成し、アンカーリンクを設定する
 
