@@ -4,6 +4,8 @@
 
 h2とh3を取得してリストを生成し、アンカーリンクを設定する
 
+[Sample](https://chinen-octtn.github.io/createTableOfContents/)
+
 ## 動作確認環境
 node v12.16.3
 npm v6.14.4
