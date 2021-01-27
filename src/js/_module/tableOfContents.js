@@ -54,18 +54,18 @@ export function tableOfContents() {
 
     // 最初の要素の開始タグ
     if(index === 0) {
-      startTag = '<li>'
+      startTag = '<li>';
     }
 
     // 最後の要素の終了タグ
     if(index === arr.length - 1) {
-      lastTag =  level === 0 ? '</li>' : '</li></ol></li>'
+      lastTag =  level === 0 ? '</li>' : '</li></ol></li>';
     }
 
     // 条件に応じたHTMLを結合
     const listElm = startTag + linkElm + lastTag;
     // 変数に追加
-    html += listElm
+    html += listElm;
   });
 
   // 目次のHTMLを表示させる
