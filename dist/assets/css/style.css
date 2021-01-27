@@ -1,0 +1,16 @@
+h1 {
+  color: red;
+}
+
+header,
+footer {
+  display: none;
+}
+
+main {
+  height: 3000px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
