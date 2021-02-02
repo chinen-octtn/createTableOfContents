@@ -1,55 +1,58 @@
 export function tableOfContents() {
   const targetId = 'tableOfContents'; // 目次を表示させる枠となるdivのid
   const entryId = 'entry'; // 見出しを取得するdivのid
-  const listId = 'indexList'; // 目次ol要素につけるid
+  const heading = 'h2, h3'; // 対象にするhタグをカンマ区切りで指定する
 
   // targetが無ければ何もしない
   const target = document.querySelector('#'+ targetId);
   if(!target) return;
 
-  // ol要素を追加
-  target.insertAdjacentHTML('beforeend', '<ol id="' + listId + '"></ol>');
-
-  // h2, h3を取得する
-  const list = document.querySelector('#' + listId);
+  // 見出しを取得する
   const entry = document.querySelector('#' + entryId);
-  const nodeList = entry.querySelectorAll('h2, h3');
+  const nodeList = entry.querySelectorAll(heading);
   // for IE
   const arr = Array.prototype.slice.call(nodeList);
 
-  // 見出しレベルがh2ならtrue、h3にネストしているならfalse
-  let topLevel = true;
+  // 基準となるレベル（見出しレベルと比較して処理する）
+  let baseLevel = 2;
+
+  // 目次HTMLを格納する
   let html = '';
 
-  // 見出しごとにループする
+  // 見出しごとに処理する
   arr.forEach((elm, index) => {
 
     // 見出しにidを付与する
     const titleId = 'title' + index;
     elm.setAttribute('id', titleId);
 
-    // 目次の要素を作成
+    // 目次の項目となる要素を作成
     const linkElm = '<a href="#' + titleId + '">' + elm.innerText + '</a>';
 
-    // h2なら0、h3なら1で分岐する
-    const level = elm.nodeName === 'H2' ? 0: 1;
+    // 見出しレベル H2なら2、H3なら3
+    const headingNode = elm.nodeName.toLowerCase();
+    const level = Number(headingNode.split('h')[1]);
+
+    // 目次の項目を挟むタグを格納する
     let startTag = '';
     let lastTag = '';
 
-    // h2
-    if(level === 0) {
-      // 直前がh2かどうか
-      startTag = topLevel ? '</li><li>' : '</li></ol></li><li>';
-      // 見出しレベルを戻す
-      topLevel = true;
-    }
-
-    // h3
-    if(level === 1) {
-      // 直前がh2かどうか
-      startTag = topLevel ? '<ol><li>' : '</li><li>';
-      // 見出しレベルをネストする
-      topLevel = false;
+    if(level === baseLevel) {
+      // 見出しレベルが同じ場合、liを続ける
+      startTag = '</li><li>';
+    } else if(level >= baseLevel) {
+      // 見出しレベルがネストした場合、olを入れ子にしてベースレベルもネストする
+      startTag = '<ol><li>';
+      baseLevel++;
+    } else {
+      // 見出しレベルが上がった場合、olを閉じてベースレベルを戻す
+      let closeTag = '';
+      for(let i = level; i < baseLevel; i++) {
+        closeTag += '</li></ol>';
+      }
+      startTag = closeTag + '</li><li>';
+      const count = Number(level - baseLevel);
+      baseLevel += count;
     }
 
     // 最初の要素の開始タグ
@@ -59,7 +62,11 @@ export function tableOfContents() {
 
     // 最後の要素の終了タグ
     if(index === arr.length - 1) {
-      lastTag =  level === 0 ? '</li>' : '</li></ol></li>';
+      let closeTag = '';
+      for(let i = 2; i < baseLevel; i++) {
+        closeTag += '</li></ol>';
+      }
+      lastTag = level === 2 ? '</li>' : closeTag + '</li>';
     }
 
     // 条件に応じたHTMLを結合
@@ -69,5 +76,5 @@ export function tableOfContents() {
   });
 
   // 目次のHTMLを表示させる
-  list.insertAdjacentHTML('beforeend', html);
+  target.insertAdjacentHTML('beforeend', '<ol>' + html + '</ol>');
 }
