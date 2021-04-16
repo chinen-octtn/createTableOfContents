@@ -1,16 +1,21 @@
 # CMSの本文から目次を自動生成するJS
 
-CMSで出力したHTMLの中からh2等の見出しを取得して目次リストを自動生成する。
-各見出しにアンカーリンクを設定する。
+1. CMSで出力したHTMLの中からh2等の見出しを取得して目次リストを自動生成する。
+2. 各見出しにアンカーリンクを設定する。
 
 [Sample](https://chinen-octtn.github.io/createTableOfContents/)
 
 
+下記JSファイルをbundleするか、exportの中身を抜き出して直接HTMLのscriptタグで読み込んでもOK。
+
 [`src/js/_module/tableOfContents.js`](https://github.com/chinen-octtn/createTableOfContents/blob/master/src/js/_module/tableOfContents.js)
 
-h2とh3を取得してリストを生成し、アンカーリンクを設定する
+or
 
-以下、設定に必要な項目
+`<script src="PATH/script.js" defer></script>`
+
+
+## 設定に必要な項目
 
 ```
 - html -
@@ -40,13 +45,14 @@ const heading = 'h2, h3'; // 対象にするhタグをカンマ区切りで指�
 * Edge
 
 
+## JSカスタマイズの開発環境
 
-# JSカスタマイズの開発環境
-## 動作環境
-node v12.16.3
-npm v6.14.4
+このリポジトリをcloneする
+### 動作環境
+* node v12.16.3
+* npm v6.14.4
 
-## ローカル開発環境の起動
+### ローカル開発環境の起動
 
 初回のみ
 ```
