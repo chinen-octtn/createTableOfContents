@@ -5,13 +5,24 @@
 
 [Sample](https://chinen-octtn.github.io/createTableOfContents/)
 
-下記 JS ファイルを bundle するか、export の中身を抜き出して直接 HTML の script タグで読み込んでも OK。
+## TypeScript 版
 
-[`src/js/_module/tableOfContents.js`](https://github.com/chinen-octtn/createTableOfContents/blob/master/src/js/_module/tableOfContents.js)
+下記ファイルを import して使用してください。
+[`src/js/_module/tableOfContents.ts`](https://github.com/chinen-octtn/createTableOfContents/blob/master/src/js/_module/tableOfContents.ts)
 
-or
+## JavaScript 版
 
-`<script src="PATH/script.js" defer></script>`
+下記をダウンロードして使用してください。
+[`docs/assets/js/createTableOfContents.js`](https://github.com/chinen-octtn/createTableOfContents/blob/master/docs/assets/js/createTableOfContents.js)
+
+`<script src="PATH/createTableOfContents.js" defer></script>`
+
+## JavaScript IE11 対応版
+
+下記をダウンロードして使用してください。
+[`docs/assets/js/createTableOfContentsForIE11.js`](https://github.com/chinen-octtn/createTableOfContents/blob/master/docs/assets/js/createTableOfContentsForIE11.js)
+
+`<script src="PATH/createTableOfContentsForIE11.js" defer></script>`
 
 ## 設定に必要な項目
 
