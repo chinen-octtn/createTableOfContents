@@ -8,18 +8,21 @@
 ## TypeScript 版
 
 下記ファイルを import して使用してください。
+
 [`src/js/_module/tableOfContents.ts`](https://github.com/chinen-octtn/createTableOfContents/blob/master/src/js/_module/tableOfContents.ts)
 
 ## JavaScript 版
 
-下記をダウンロードして使用してください。
+下記ファイルをダウンロードして使用してください。
+
 [`docs/assets/js/createTableOfContents.js`](https://github.com/chinen-octtn/createTableOfContents/blob/master/docs/assets/js/createTableOfContents.js)
 
 `<script src="PATH/createTableOfContents.js" defer></script>`
 
 ## JavaScript IE11 対応版
 
-下記をダウンロードして使用してください。
+下記ファイルをダウンロードして使用してください。
+
 [`docs/assets/js/createTableOfContentsForIE11.js`](https://github.com/chinen-octtn/createTableOfContents/blob/master/docs/assets/js/createTableOfContentsForIE11.js)
 
 `<script src="PATH/createTableOfContentsForIE11.js" defer></script>`
