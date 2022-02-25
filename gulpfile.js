@@ -1,181 +1,182 @@
-// 必要プラグインの読み込み
-const gulp = require('gulp');
+/** ===== var ===== **/
+// gulp
+const gulp = require('gulp')
 
 // Pug
-const gulpPug = require('gulp-pug');
-const fs = require('fs');
-// const data = require('gulp-data'); // Pugで多言語対応したい場合は解除
-// const path = require('path'); // Pugで多言語対応したい場合は解除
+const gulpPug = require('gulp-pug')
+const fs = require('fs')
 
 // Sass
-const gulpSass = require('gulp-sass');
-const sassGlob = require('gulp-sass-glob'); // sassのインポートを*でまとめる
-const postcss = require('gulp-postcss');
-const postcssSyntax = require('postcss-scss');
-const autoprefixer = require('autoprefixer');
-const mqpacker = require('css-mqpacker'); // メディアクエリーをまとる
-const stylelint = require('stylelint');
-const postcssReporter = require('postcss-reporter');
+const gulpSass = require('gulp-sass')(require('sass'))
+const sassGlob = require('gulp-sass-glob-use-forward')
+const postcss = require('gulp-postcss')
+const postcssSyntax = require('postcss-scss')
+const autoprefixer = require('autoprefixer')
+const cmq = require('postcss-combine-media-query')
+const stylelint = require('stylelint')
 
 // Image
-const imagemin = require('gulp-imagemin');
-const imageminMozjpeg = require('imagemin-mozjpeg');
-const imageminPngquant = require('imagemin-pngquant');
+const imagemin = require('gulp-imagemin')
+const imageminMozjpeg = require('imagemin-mozjpeg')
+const imageminPngquant = require('imagemin-pngquant')
 
 // Local server
-const browserSync = require('browser-sync');
-const browserSyncSsi = require('browsersync-ssi');
+const browserSync = require('browser-sync')
+const browserSyncSsi = require('browsersync-ssi')
 
 // webpack
-const webpackStream = require('webpack-stream');
-const webpack = require('webpack');
-const webpackConfig = require('./webpack.config');　// webpackの設定ファイルの読み込み
-
+const webpackStream = require('webpack-stream')
+const webpack = require('webpack')
+const webpackConfig = require('./webpack.config') // webpackの設定ファイルの読み込み
+const named = require('vinyl-named')
 // Utility
-const plumber = require('gulp-plumber');
-const notify = require('gulp-notify');
-const changed = require('gulp-changed');
+const plumber = require('gulp-plumber')
+const notify = require('gulp-notify')
+const changed = require('gulp-changed')
 
-/**
- * 開発用ディレクトリ
- */
+// 公開用ディレクトリ
+const dest = 'docs/'
+
+// 開発用ディレクトリ
 const src = {
-  root: 'src/',
-  data: 'src/_data/',
-  pug: 'src/pug/',
-  html: ['src/pug/**/*.pug', '!src/pug/**/_*.pug'],
-  htmlWatch: ['src/**/*.pug', 'src/_data/**/*.json'],
-  css: ['./src/scss/**/*.scss', '!./src/scss/**/_*.scss'],
-  cssWatch: 'src/**/*.scss',
-  jsWatch: 'src/**/*.js',
-  image: 'src/img/**/*.{png,jpg,gif,svg,ico}',
-  imageWatch: 'src/img/**/*',
-};
-//　ここで指定したパスが↓dest時に引き継がれる
+  data: 'src/_data/site.json',
+  pug: {
+    dir: 'src/pug/',
+    file: 'src/pug/**/!(_)*.pug',
+    watch: ['src/pug/**/(_)*.pug', 'src/_data/**/*.json'],
+  },
+  sass: {
+    dir: 'src/scss',
+    file: 'src/scss/**/!(_)*.scss',
+    watch: 'src/**/*.scss',
+  },
+  js: {
+    file: 'src/js/**/!(_)*.ts',
+    watch: 'src/**/*.ts',
+  },
+  img: {
+    file: 'src/img/**/*.{png,jpg,gif,svg,ico}',
+    watch: 'src/img/**/*',
+  },
+  public: {
+    file: 'src/public/**/*',
+  },
+}
+
+/** ===== task ===== **/
+/**
+ * Reload
+ */
+const reload = (done) => {
+  browserSync.reload()
+  done()
+}
+exports.reload = reload
 
 /**
- * 公開用ディレクトリ
+ * Pug
+ * .pug -> .html
  */
-const dest = {
-  root: 'docs/',
-  image: 'docs/assets/img/',
-  css: 'docs/assets/css/',
-  js: 'docs/assets/js/',
-};
-
-
-// Pug
-// .pug -> .html
-function pug() {
-  // JSONファイルの読み込み。
-  const locals = {
-    site: JSON.parse(fs.readFileSync(`${src.data}/site.json`)),
-  };
-  // locals.ja = {
-  //   // 日本語サイト
-  //   site: JSON.parse(fs.readFileSync(`${src.data}ja/site.json`)),
-  // };
-  // locals.en = {
-  //   // 英語サイト
-  //   site: JSON.parse(fs.readFileSync(`${src.data}en/site.json`)),
-  // };
+const pugFunc = (isAll) => {
+  // metaデータ等JSONファイルの読み込み。
+  const lastRun = isAll ? null : gulp.lastRun(pugFunc)
+  const data = {
+    site: JSON.parse(fs.readFileSync(src.data)),
+  }
   return (
     gulp
-      .src(src.html)
-      .pipe(plumber({ errorHandler: notify.onError('Error: <%= error.message %>') }))
-      // .pipe(
-      //   data(file => {
-      //     // 各ページのルート相対パスを格納します。
-      //     locals.pageAbsolutePath = `/${path
-      //       .relative(file.base, file.path.replace(/.pug$/, '.html'))
-      //       .replace(/index\.html$/, '')}`;
-      //     return locals;
-      //   }),
-      // )
-      // .pipe(cache('html'))
+      .src(src.pug.file, { since: lastRun })
+      // .src(src.pug.file, { since: gulp.lastRun(pug) })
+      .pipe(plumber({ errorHandler: notify.onError('Error: <%= error %>') }))
       .pipe(
         gulpPug({
-          // `locals`に渡したデータを各Pugファイルで取得できます。
-          locals,
-          // ルート相対パスでincludeが使えるようにします。
-          basedir: src.pug,
-          // Pugファイルの整形。
+          // dataを各Pugファイルで取得
+          data,
+          // ルート相対パスでincludeが使えるようにする
+          basedir: src.pug.dir,
+          // Pugファイルの整形
           pretty: true,
-        }),
+        })
       )
-      .pipe(gulp.dest(dest.root))
-      .pipe(browserSync.reload({ stream: true }))
-  );
+      .pipe(gulp.dest(dest))
+  )
 }
-exports.pug = pug;
 
+// 差分build
+const pug = () => {
+  return pugFunc()
+}
+const html = gulp.series(pug, reload)
 
-// Sass
-// scss -> css
-gulpSass.compiler = require('dart-sass');
+// 全build
+const pugAll = () => {
+  console.log('Build all pug file...')
+  return pugFunc(true)
+}
+const htmlAll = gulp.series(pugAll, reload)
+
+/**
+ * Sass
+ * .scss -> .css
+ */
 function sass() {
-  const lintPlugins = [
-    stylelint(),
-    postcssReporter({ clearMessages: true }),
-  ];
-  const formatPlugins = [
-    autoprefixer(),
-    mqpacker(),
-  ];
-  return (
-    gulp
-      .src(src.css)
-      // globパターンでのインポート機能を追加
-      .pipe(sassGlob())
-      .pipe(postcss(lintPlugins, {
-        syntax: postcssSyntax
-      }))
-      .pipe(
-        gulpSass({
-          outputStyle: 'expanded', // expanded or compressed
-        }).on('error', gulpSass.logError),
-      )
-      .pipe(plumber({ errorHandler: notify.onError('Error: <%= error.message %>') }))
-      .pipe(postcss(formatPlugins, {
-        syntax: postcssSyntax
-      }))
-      .pipe(
-        gulp.dest(dest.css),
-      )
-      .pipe(browserSync.reload({ stream: true }))
-  );
-}
-exports.sass = sass;
-
-/**
-* JS
-* ES6をWebpackでbundle + ES5に変換
-*/
-function js() {
-  return (
-    webpackStream(webpackConfig, webpack)
-    .pipe(gulp.dest(dest.js))
+  const lintPlugins = [stylelint()]
+  return gulp
+    .src(src.sass.file)
+    .pipe(plumber({ errorHandler: notify.onError('Error: <%= error %>') }))
+    .pipe(
+      postcss(lintPlugins, {
+        syntax: postcssSyntax,
+      })
+    )
+    .pipe(sassGlob())
+    .pipe(
+      gulpSass({
+        outputStyle: 'expanded', // expanded or compressed
+        includePaths: [src.sass.dir],
+      }).on('error', gulpSass.logError)
+    )
+    .pipe(postcss([cmq(), autoprefixer()]))
+    .pipe(gulp.dest(dest))
     .pipe(browserSync.reload({ stream: true }))
-  );
 }
-exports.js = js;
-
+exports.sass = sass
 
 /**
- * 画像を圧縮
+ * JS
+ * ES6をWebpackでbundle
+ * .ts → .js
+ */
+function js() {
+  return gulp
+    .src(src.js.file)
+    .pipe(plumber({ errorHandler: notify.onError('Error: <%= error %>') }))
+    .pipe(
+      named((file) => {
+        return file.relative.replace(/\.[^\.]+$/, '')
+      })
+    )
+    .pipe(webpackStream(webpackConfig, webpack))
+    .pipe(gulp.dest(dest))
+    .pipe(browserSync.reload({ stream: true }))
+}
+exports.js = js
+
+/**
+ * Image Optimizer
  */
 function image() {
   return gulp
-    .src(src.image)
-    .pipe(changed(dest.image))
+    .src(src.img.file)
+    .pipe(changed(dest))
     .pipe(
       plumber({
         errorHandler(err) {
           // eslint-disable-next-line no-console
-          console.log(err.messageFormatted);
-          this.emit('end');
+          console.log(err.messageFormatted)
+          this.emit('end')
         },
-      }),
+      })
     )
     .pipe(
       imagemin([
@@ -189,40 +190,42 @@ function image() {
         }),
         imagemin.svgo({
           plugins: [
-            // viewBox属性を削除する（widthとheight属性がある場合）。
-            // 表示が崩れる原因になるので削除しない。
+            // viewBox属性が無いと表示崩れの原因になるので削除しない
             { removeViewBox: false },
-            // <metadata>を削除する。
-            // 追加したmetadataを削除する必要はない。
+            // metadataは意図的に入れる場合があるので削除しない
             { removeMetadata: false },
-            // SVGの仕様に含まれていないタグや属性、id属性やversion属性を削除する。
-            // 追加した要素を削除する必要はない。
+            // 追加した要素を削除しない
             { removeUnknownsAndDefaults: false },
-            // コードが短くなる場合だけ<path>に変換する。
-            // アニメーションが動作しない可能性があるので変換しない。
+            // 勝手に<path>へ変換しない
             { convertShapeToPath: false },
-            // 重複や不要な`<g>`タグを削除する。
-            // アニメーションが動作しない可能性があるので変換しない。
+            // <g>タグを削除するとアニメーションが動作しない可能性があるので変換しない
             { collapseGroups: false },
-            // SVG内に<style>や<script>がなければidを削除する。
-            // idにアンカーが貼られていたら削除せずにid名を縮小する。
-            // id属性は動作の起点となることがあるため削除しない。
+            // id属性はJSに使う場合があるとなることがあるため削除しない。
             { cleanupIDs: false },
           ],
         }),
         imagemin.optipng(),
         imagemin.gifsicle(),
-      ]),
+      ])
     )
-    .pipe(gulp.dest(dest.image))
-    .pipe(browserSync.reload({ stream: true }));
+    .pipe(gulp.dest(dest))
+    .pipe(browserSync.reload({ stream: true }))
 }
-exports.image = image;
-
+exports.image = image
 
 /**
-* ローカルサーバーを起動
-*/
+ * Copy
+ * 変換不要でdistにコピーしたいもの
+ * src/public/ → dist/
+ */
+function copy() {
+  return gulp.src(src.public.file).pipe(gulp.dest(dest))
+}
+exports.copy = copy
+
+/**
+ * Local server
+ */
 function serve(done) {
   // const httpsOption =
   //   process.env.HTTPS_KEY !== undefined
@@ -233,41 +236,47 @@ function serve(done) {
       // SSIを使用
       middleware: [
         browserSyncSsi({
-          baseDir: dest.root,
+          baseDir: dest,
           ext: '.html',
         }),
       ],
-      baseDir: dest.root,
+      baseDir: dest,
     },
     // ローカルでhttpsを有効にする場合はコメントアウトを解除、認証用の.envファイルを用意する
     // https: httpsOption,
-    // 共有画面でスクロールやクリックをミラーリングする場合はtrueにする
+    // 他の画面でクリックをミラーリングしない
     ghostMode: false,
-    // ローカルIPアドレスでサーバーを立ち上げ
+    // ローカルIPアドレスで起動する
     open: 'external',
-    // サーバー起動時に表示するページを指定
+    // サーバー起動時に表示するページ
     startPath: '/',
-    // サーバー起動時にポップアップを表示させない場合はfalse
+    // サーバー起動時の通知は不要
     notify: false,
-  });
-  done();
+  })
+  done()
 }
-exports.serve = serve;
+exports.serve = serve
 
-
-
-// 監視
+/**
+ * Watch
+ */
 function watch() {
-  gulp.watch(src.htmlWatch, pug);
-  gulp.watch(src.cssWatch, sass);
-  gulp.watch(src.jsWatch, js);
-  gulp.watch(src.imageWatch, image);
+  gulp.watch(src.pug.file, html)
+  gulp.watch(src.pug.watch, htmlAll)
+  gulp.watch(src.sass.watch, sass)
+  gulp.watch(src.js.watch, js)
+  gulp.watch(src.img.watch, image)
+  gulp.watch(src.public.file, copy)
 }
-exports.watch = watch;
+exports.watch = watch
 
-
-// デフォルトタスク
+/**
+ * default
+ */
 exports.default = gulp.series(
-  gulp.parallel(pug, sass, js, image),
-  gulp.parallel(serve, watch),
-);
+  pug,
+  sass,
+  serve,
+  gulp.parallel(js, image, copy),
+  watch
+)
