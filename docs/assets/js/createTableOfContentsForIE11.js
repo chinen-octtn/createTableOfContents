@@ -9,7 +9,7 @@ const tableOfContents = function () {
 
   // 見出しを取得する
   const entry = document.querySelector('#' + entryId)
-  const nodeList = entry?.querySelectorAll(heading)
+  const nodeList = entry.querySelectorAll(heading)
   // for IE
   const arr = Array.prototype.slice.call(nodeList)
 
